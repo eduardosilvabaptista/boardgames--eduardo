@@ -1,0 +1,15 @@
+# Boardgames Eduardo 2.0
+
+Aplicação independente para gerir coleção, sessões e classificações de jogos de tabuleiro.
+
+## Publicar no GitHub Pages
+1. Colocar estes ficheiros na raiz do repositório (não dentro de uma pasta).
+2. GitHub → Settings → Pages.
+3. Em Build and deployment, escolher Deploy from a branch.
+4. Branch: `main`; pasta: `/(root)`; carregar em Save.
+5. Aguardar até aparecer a indicação de publicação concluída.
+
+O ficheiro inicial tem de se chamar exatamente `index.html`.
+
+## Dados
+Os dados são guardados no armazenamento local do navegador. Esta versão usa uma chave própria e não importa sessões da aplicação anterior.

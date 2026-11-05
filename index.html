@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172554">
+  <meta name="description" content="Coleção e sessões de jogos de tabuleiro.">
+  <title>Boardgames Eduardo 2.0</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f3f5fa}
+    *{box-sizing:border-box}body{margin:0}header{background:#172554;color:white;padding:22px max(18px,calc((100% - 1050px)/2))}
+    h1{margin:0;font-size:1.55rem}header p{margin:6px 0 0;color:#dbeafe}
+    main{max-width:1050px;margin:22px auto;padding:0 14px 48px}
+    nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    button,.btn{border:0;border-radius:10px;padding:10px 14px;background:#1d4ed8;color:white;font-weight:650;cursor:pointer}
+    button.secondary{background:#e2e8f0;color:#172033}button.danger{background:#b91c1c}
+    section.panel{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 3px 12px #0f172a0a}
+    h2{font-size:1.2rem;margin:0 0 14px}h3{font-size:1rem;margin:0 0 8px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    label{display:block;font-size:.9rem;font-weight:650;margin:8px 0 4px}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;background:white}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.row>*{flex:1}
+    .muted{color:#64748b;font-size:.9rem}.status{padding:10px;border-radius:9px;background:#eff6ff;margin-top:10px}
+    .tabs button.active{background:#172554}.hidden{display:none!important}
+    table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+    .tablewrap{overflow-x:auto}.pill{display:inline-block;background:#dbeafe;color:#1e40af;padding:3px 8px;border-radius:99px;font-size:.8rem}
+    .game{padding:12px 0;border-bottom:1px solid #e2e8f0}.game:last-child{border:0}
+    .players{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:7px;margin:8px 0}
+    @media(max-width:600px){.players{grid-template-columns:1fr 1fr}.players button{grid-column:span 2}header{padding:18px}main{margin-top:12px}}
+  </style>
+</head>
+<body>
+<header><h1>🎲 Boardgames Eduardo 2.0</h1><p>A tua coleção, sessões e classificações — guardadas neste dispositivo.</p></header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="home">Resumo</button>
+    <button class="secondary" data-tab="games">Coleção</button>
+    <button class="secondary" data-tab="session">Nova sessão</button>
+    <button class="secondary" data-tab="ranking">Classificações</button>
+    <button class="secondary" data-tab="history">Histórico</button>
+  </nav>
+  <div id="home" class="view">
+    <section class="panel"><h2>Bem-vindo!</h2><div class="grid"><div><div class="muted">Jogos na coleção</div><h2 id="homeGames">0</h2></div><div><div class="muted">Sessões registadas</div><h2 id="homeSessions">0</h2></div><div><div class="muted">Jogadores registados</div><h2 id="homePlayers">0</h2></div></div></section>
+    <section class="panel"><h2>Importar coleção do BoardGameGeek</h2><p class="muted">Nome de utilizador predefinido: <b>calhorda</b>. Se a importação direta não funcionar, exporta a coleção em XML no BGG e seleciona o ficheiro aqui.</p>
+      <div class="row"><div><label for="bggUser">Utilizador BGG</label><input id="bggUser" value="calhorda"></div><button id="bggImport">Importar coleção</button></div>
+      <label for="xmlFile">Ou importar ficheiro XML do BGG</label><input id="xmlFile" type="file" accept=".xml,text/xml">
+      <div id="importStatus" class="status hidden"></div>
+    </section>
+  </div>
+  <div id="games" class="view hidden">
+    <section class="panel"><h2>Adicionar jogo</h2><div class="grid"><div><label for="gameName">Nome do jogo</label><input id="gameName" placeholder="Ex.: Azul"></div><div><label for="gameYear">Ano (opcional)</label><input id="gameYear" type="number" min="1900" max="2100" placeholder="2024"></div></div><p><button id="addGame">Adicionar à coleção</button></p></section>
+    <section class="panel"><h2>A minha coleção</h2><div id="gameList"></div></section>
+  </div>
+  <div id="session" class="view hidden">
+    <section class="panel"><h2>Registar sessão</h2><div class="grid"><div><label for="sessionGame">Jogo</label><select id="sessionGame"></select></div><div><label for="sessionDate">Data</label><input id="sessionDate" type="date"></div></div>
+      <h3 style="margin-top:16px">Jogadores e resultados</h3><p class="muted">O lugar define os pontos da classificação. A pontuação real do jogo fica num campo separado.</p>
+      <div id="playerRows"></div><p><button class="secondary" id="addPlayer">+ Adicionar jogador</button></p><label for="sessionNotes">Notas (opcional)</label><textarea id="sessionNotes" rows="2"></textarea><p><button id="saveSession">Guardar sessão</button></p><div id="sessionStatus" class="status hidden"></div>
+    </section>
+  </div>
+  <div id="ranking" class="view hidden">
+    <section class="panel"><h2>Classificação geral</h2><p class="muted">Pontos por lugar: 1.º = 5; 2.º = 3; 3.º = 2; restantes = 1. Empates partilham a média dos pontos dos lugares ocupados.</p><div class="tablewrap" id="overallRanking"></div></section>
+    <section class="panel"><h2>Classificação por jogo</h2><label for="rankGame">Escolher jogo</label><select id="rankGame"></select><div class="tablewrap" id="gameRanking"></div></section>
+  </div>
+  <div id="history" class="view hidden"><section class="panel"><h2>Histórico de sessões</h2><div id="historyList"></div></section></div>
+  <p class="muted">Os dados ficam guardados no navegador deste dispositivo. Usa a opção de exportação do navegador para fazer cópias de segurança regularmente.</p>
+</main>
+<script>
+(() => {
+  const KEY='boardgames-eduardo-2-0-data';
+  let data={games:[],sessions:[]};
+  try{data=JSON.parse(localStorage.getItem(KEY))||data}catch(e){}
+  const $=id=>document.getElementById(id);
+  const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function tab(name){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.id!==name));document.querySelectorAll('[data-tab]').forEach(x=>{x.classList.toggle('active',x.dataset.tab===name);x.classList.toggle('secondary',x.dataset.tab!==name)});render()}
+  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
+  function render(){
+    $('homeGames').textContent=data.games.length;$('homeSessions').textContent=data.sessions.length;
+    $('homePlayers').textContent=new Set(data.sessions.flatMap(s=>s.players.map(p=>p.name))).size;
+    $('gameList').innerHTML=data.games.length?data.games.map(g=>`<div class="game"><b>${esc(g.name)}</b> ${g.year?`<span class="muted">(${esc(g.year)})</span>`:''} <button class="danger" data-del="${g.id}">Remover</button></div>`).join(''):'<p class="muted">Ainda não tens jogos. Podes adicionar um acima ou importar do BGG.</p>';
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Remover este jogo da coleção? As sessões existentes não são apagadas.')){data.games=data.games.filter(g=>g.id!==b.dataset.del);save();render()}});
+    const opts=data.games.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('');
+    $('sessionGame').innerHTML=opts||'<option value="">Adiciona primeiro um jogo</option>';$('rankGame').innerHTML=opts||'<option value="">Sem jogos</option>';
+    $('historyList').innerHTML=data.sessions.length?data.sessions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<div class="game"><b>${esc(data.games.find(g=>g.id===s.gameId)?.name||s.gameName||'Jogo removido')}</b> — ${esc(s.date)}<br>${s.players.map(p=>`${esc(p.name)}: ${p.place}.º lugar${p.score!==''?`, pontuação ${esc(p.score)}`:''}`).join(' · ')}${s.notes?`<p class="muted">${esc(s.notes)}</p>`:''}</div>`).join(''):'<p class="muted">Ainda não há sessões registadas.</p>';
+    const totals={};data.sessions.forEach(s=>s.players.forEach(p=>{totals[p.name]??={points:0,plays:0,wins:0};totals[p.name].points+=p.points;totals[p.name].plays++;if(p.place===1)totals[p.name].wins++}));
+    $('overallRanking').innerHTML=rankTable(totals);
+    const gid=$('rankGame').value;const per={};data.sessions.filter(s=>s.gameId===gid).forEach(s=>s.players.forEach(p=>{per[p.name]??={points:0,plays:0,wins:0};per[p.name].points+=p.points;per[p.name].plays++;if(p.place===1)per[p.name].wins++}));
+    $('gameRanking').innerHTML=rankTable(per);
+  }
+  function rankTable(obj){const rows=Object.entries(obj).sort((a,b)=>b[1].points-a[1].points||b[1].wins-a[1].wins);return rows.length?`<table><thead><tr><th>Jogador</th><th>Pontos</th><th>Sessões</th><th>Vitórias</th></tr></thead><tbody>${rows.map(([n,v])=>`<tr><td>${esc(n)}</td><td>${v.points}</td><td>${v.plays}</td><td>${v.wins}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">Ainda sem resultados.</p>'}
+  $('rankGame').addEventListener('change',render);
+  $('addGame').onclick=()=>{const name=$('gameName').value.trim();if(!name){alert('Escreve o nome do jogo.');return}if(data.games.some(g=>g.name.toLowerCase()===name.toLowerCase())){alert('Esse jogo já existe.');return}data.games.push({id:crypto.randomUUID(),name,year:$('gameYear').value});save();$('gameName').value='';$('gameYear').value='';render()};
+  function addPlayerRow(){const d=document.createElement('div');d.className='players';d.innerHTML='<input placeholder="Nome do jogador" aria-label="Nome do jogador"><input type="number" min="1" placeholder="Lugar" aria-label="Lugar"><input type="number" step="any" placeholder="Pontuação real" aria-label="Pontuação real"><button class="danger" type="button">X</button>';d.querySelector('button').onclick=()=>d.remove();$('playerRows').append(d)}
+  $('addPlayer').onclick=addPlayerRow;addPlayerRow();$('sessionDate').value=new Date().toISOString().slice(0,10);
+  $('saveSession').onclick=()=>{const game=data.games.find(g=>g.id===$('sessionGame').value);if(!game){alert('Adiciona ou escolhe um jogo.');return}const players=[...$('playerRows').children].map(r=>{const [name,place,score]=r.querySelectorAll('input');return{name:name.value.trim(),place:Number(place.value),score:score.value,points:0}}).filter(p=>p.name);if(players.length<1||players.some(p=>!Number.isInteger(p.place)||p.place<1)){alert('Indica o nome e o lugar de cada jogador.');return}const groups={};players.forEach(p=>(groups[p.place]??=[]).push(p));Object.entries(groups).forEach(([place,ps])=>{const n=Number(place);const vals=[];for(let i=0;i<ps.length;i++){const pos=n+i;vals.push(pos===1?5:pos===2?3:pos===3?2:1)}const avg=vals.reduce((a,b)=>a+b,0)/vals.length;ps.forEach(p=>p.points=avg)});data.sessions.push({id:crypto.randomUUID(),gameId:game.id,gameName:game.name,date:$('sessionDate').value,players,notes:$('sessionNotes').value.trim()});save();$('playerRows').innerHTML='';addPlayerRow();$('sessionNotes').value='';$('sessionStatus').textContent='Sessão guardada com sucesso.';$('sessionStatus').classList.remove('hidden');render()};
+  function showImport(msg){$('importStatus').textContent=msg;$('importStatus').classList.remove('hidden')}
+  function importXml(text){const xml=new DOMParser().parseFromString(text,'text/xml');if(xml.querySelector('parsererror'))throw Error('O ficheiro XML não parece válido.');let count=0;xml.querySelectorAll('item').forEach(item=>{const name=item.querySelector('name')?.textContent?.trim();if(!name)return;const year=item.querySelector('yearpublished')?.textContent?.trim()||'';if(!data.games.some(g=>g.name.toLowerCase()===name.toLowerCase())){data.games.push({id:crypto.randomUUID(),name,year});count++}});save();render();return count}
+  $('xmlFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{showImport(`Importados ${importXml(await f.text())} jogos.`)}catch(err){showImport(err.message)}};
+  $('bggImport').onclick=async()=>{const user=$('bggUser').value.trim()||'calhorda';showImport('A contactar o BoardGameGeek…');try{const url=`https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(user)}&own=1`;const res=await fetch(url);if(!res.ok)throw Error('O BGG não disponibilizou a coleção diretamente.');const text=await res.text();if(text.includes('Your request has been accepted')||text.includes('queued'))throw Error('O BGG está a preparar a coleção. Tenta novamente dentro de alguns segundos ou usa o ficheiro XML.');showImport(`Importados ${importXml(text)} jogos.`)}catch(e){showImport('A importação direta não foi possível neste navegador. No BGG, exporta a coleção em XML e escolhe esse ficheiro acima. Detalhe: '+e.message)}};
+  render();
+  if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+</body></html>
